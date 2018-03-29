@@ -8,7 +8,7 @@ var InputTracker = /** @class */ (function () {
         this.word = text.substring(this.position);
         if (key == 32) {
             this.position = text.length;
-            prompt(this.word);
+            //from here process the word to see if it's language can be found
         }
         else {
             return;
