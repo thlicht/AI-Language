@@ -1,7 +1,7 @@
-const GermanWords: Array<string> = [];
-const SpanWords: Array<string> = [];
-const EngWords: Array<string> = [];
-const FrenWords: Array<string> = [];
+const GermanWords: Array<string> = ["das","ist","du","ich", "nicht","die","es","und","Sie","der","was","wir","zu","ein","in","sie","mir","mit","ja","wie","den","auf","mich","dass"];
+const SpanWords: Array<string> = ["vez", "año", "tiempo", "dia", "cosa" ,"ser","haber", "estar","tener","hacer","su", "lo", "todo","más", "este", "ya","muy","también", "así", "sí", "que", "y","como","pero","o"];
+const EngWords: Array<string> = ["the","be","to","of","and","a","in","that","have","I","it","for","not","on","with","he","as","you","do","at","this","but","his","by","from"];
+const FrenWords: Array<string> = ["Le","De","Un","À","Être","Et","En","Avoir","Que","Pour","Dans","Ce","Il","Qui","Ne","Sur","Se","Pas","Plus","Pouvoir","Par","Je","Avec","Tout","Faire"];
 
 let compareWords = (wordstoCompare: Array<string>, word: string):boolean => {
     
@@ -26,7 +26,7 @@ class InputTracker {
     }
     //attempt to make a determination of for the language of the paragraph
     process(text: string, key: number):void {
-        this.word = text.substring(this.position);
+        this.word = text.substring(this.position,text.length-1);
         if(key == 32)
         {
             this.position = text.length;
