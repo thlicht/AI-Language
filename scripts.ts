@@ -31,11 +31,13 @@ class InputTracker {
     position: number;
     word: string;
     LanguageProbs : LetterToFreq;
+    BestGuess : string;
 
     constructor(){
         this.position = 0;
         this.word = "";
         this.LanguageProbs = { "German": 0, "English" : 0, "French" : 0, "Spanish" : 0};
+        this.BestGuess = "";
     }
 
     heuristic(word: string){
@@ -53,44 +55,87 @@ class InputTracker {
     //attempt to make a determination of for the language of the paragraph
     process(text: string, key: number):void {
         this.word = text.substring(this.position,text.length-1);
+        this.word = this.word.trim();
         if(key == 32)
         {
-            this.position = text.length;
+            text = text.trim();
+            this.position += (text.length - this.position);
             //from here process the word to see if it's language can be found
-            let g = compareWords(GermanWords, this.word);
-            let f = compareWords(FrenWords, this.word);
-            let e = compareWords(EngWords, this.word);
-            let s = compareWords(SpanWords, this.word);
-            this.heuristic(text);
-
-
-            if(g)
+            this.heuristic(this.word);
+            this.FindBestProb();
+            if(this.BestGuess == "English")
             {
-                alert("German");
-                return;
+                if(compareWords(EngWords, this.word))
+                {
+                    alert("English");
+                }
             }
-            else if(f)
+            else if (this.BestGuess == "French")
             {
-                alert("French");
-                return;
+                if(compareWords(FrenWords, this.word))
+                {
+                    alert("French");
+                }
             }
-            else if(e)
+            else if (this.BestGuess == "Spanish")
             {
-                alert("English");
-                return;
+                if(compareWords(SpanWords, this.word))
+                {
+                    alert("Spanish");
+                }
             }
-            else if(s)
+            else if (this.BestGuess == "German")
             {
-                alert("Spanish");
-                return;
+                if(compareWords(GermanWords, this.word))
+                {
+                    alert("German");
+                }
             }
+             if(this.GoalCheck())
+             {
+                 alert("Threshold");
+             }
         }
         else{
             return;
         }
     }
 
-    
+    FindBestProb (){
+        let Language = this.BestGuess;
+        let large:number;
+        if(this.BestGuess == "")
+        {
+            large = 0;
+        }
+        else
+        {
+            large = this.LanguageProbs[this.BestGuess];
+        }
+        
+        let Langs = ["English","French", "German", "Spanish"];
+
+        for (let i = 0; i < 4; i++)
+        {
+            if(this.LanguageProbs[Langs[i]] > large)
+            {
+                large = this.LanguageProbs[Langs[i]];
+                Language = Langs[i];
+            }
+        }
+
+        this.BestGuess = Language;
+    }
+
+    GoalCheck () : boolean {
+
+        return this.LanguageProbs[this.BestGuess] > .7 ? true : false;
+        /*if (this.LanguageProbs[this.BestGuess] > .70)
+        {
+            return true;
+        }
+        return false;*/
+    }
 }
 
 let tracker = null;
