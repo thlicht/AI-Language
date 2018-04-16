@@ -2,7 +2,7 @@
 const GermanWords: Array<string> = ["das","ist","du","ich", "nicht","die","es","und","Sie","der","was","wir","zu","ein","in","sie","mir","mit","ja","wie","den","auf","mich","dass"];
 const SpanWords: Array<string> = ["vez", "año", "tiempo", "dia", "cosa" ,"ser","haber", "estar","tener","hacer","su", "lo", "todo","más", "este", "ya","muy","también", "así", "sí", "que", "y","como","pero","o"];
 const EngWords: Array<string> = ["the","be","to","of","and","a","in","that","have","I","it","for","not","on","with","he","as","you","do","at","this","but","his","by","from"];
-const FrenWords: Array<string> = ["Le","De","Un","À","Être","Et","En","Avoir","Que","Pour","Dans","Ce","Il","Qui","Ne","Sur","Se","Pas","Plus","Pouvoir","Par","Je","Avec","Tout","Faire"];
+const FrenWords: Array<string> = ["le","de","U=un","À","Être","et","en","avoir","que","pour","dans","ce","il","qui","ne","sur","se","pas","plus","pouvoir","par","je","avec","tout","faire"];
 
 interface LetterToFreq {
     [letter:string] : number;
@@ -45,10 +45,10 @@ class InputTracker {
         word = word.trim();
         for (let i = 0; i < word.length; i++)
         {
-            this.LanguageProbs["German"] += GerFreq[word[i]];
-            this.LanguageProbs["English"] += EngFreq[word[i]];
-            this.LanguageProbs["Spanish"] += SpanFreq[word[i]];
-            this.LanguageProbs["French"] += FrenFreq[word[i]];
+            this.LanguageProbs["German"] += (GerFreq[word[i]] / 1);
+            this.LanguageProbs["English"] += (EngFreq[word[i]] / 1);
+            this.LanguageProbs["Spanish"] += (SpanFreq[word[i]] / 1);
+            this.LanguageProbs["French"] += (FrenFreq[word[i]] / 1);
         }
     }
 
@@ -93,7 +93,7 @@ class InputTracker {
             }
              if(this.GoalCheck())
              {
-                 alert("Threshold");
+                 alert("Threshold " + this.BestGuess);
              }
         }
         else{
