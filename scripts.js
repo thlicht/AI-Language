@@ -27,17 +27,27 @@ var InputTracker = /** @class */ (function () {
     InputTracker.prototype.heuristic = function (word) {
         word = word.toLocaleLowerCase();
         word = word.trim();
+        var runningSum = 0;
         for (var i = 0; i < word.length; i++) {
-            this.LanguageProbs["German"] += (GerFreq[word[i]] / 1);
-            this.LanguageProbs["English"] += (EngFreq[word[i]] / 1);
-            this.LanguageProbs["Spanish"] += (SpanFreq[word[i]] / 1);
-            this.LanguageProbs["French"] += (FrenFreq[word[i]] / 1);
+            this.LanguageProbs["German"] += GerFreq[word[i]];
+            this.LanguageProbs["English"] += EngFreq[word[i]];
+            this.LanguageProbs["Spanish"] += SpanFreq[word[i]];
+            this.LanguageProbs["French"] += FrenFreq[word[i]];
         }
+        runningSum = this.LanguageProbs["German"] + this.LanguageProbs["English"] + this.LanguageProbs["Spanish"] + this.LanguageProbs["French"];
+        this.LanguageProbs["German"] = this.LanguageProbs["German"] / runningSum;
+        this.LanguageProbs["English"] = this.LanguageProbs["English"] / runningSum;
+        this.LanguageProbs["Spanish"] = this.LanguageProbs["Spanish"] / runningSum;
+        this.LanguageProbs["French"] = this.LanguageProbs["French"] / runningSum;
     };
     //attempt to make a determination of for the language of the paragraph
     InputTracker.prototype.process = function (text, key) {
         this.word = text.substring(this.position, text.length - 1);
         this.word = this.word.trim();
+        if (text.trim().length == 0) {
+            this.clear();
+            this.position = 0;
+        }
         if (key == 32) {
             text = text.trim();
             this.position += (text.length - this.position);
@@ -46,22 +56,22 @@ var InputTracker = /** @class */ (function () {
             this.FindBestProb();
             if (this.BestGuess == "English") {
                 if (compareWords(EngWords, this.word)) {
-                    alert("English");
+                    document.getElementById('language').innerHTML = "English";
                 }
             }
             else if (this.BestGuess == "French") {
                 if (compareWords(FrenWords, this.word)) {
-                    alert("French");
+                    document.getElementById('language').innerHTML = "French";
                 }
             }
             else if (this.BestGuess == "Spanish") {
                 if (compareWords(SpanWords, this.word)) {
-                    alert("Spanish");
+                    document.getElementById('language').innerHTML = "Spanish";
                 }
             }
             else if (this.BestGuess == "German") {
                 if (compareWords(GermanWords, this.word)) {
-                    alert("German");
+                    document.getElementById('language').innerHTML = "German";
                 }
             }
             if (this.GoalCheck()) {
@@ -89,6 +99,7 @@ var InputTracker = /** @class */ (function () {
             }
         }
         this.BestGuess = Language;
+        document.getElementById('prob').innerHTML = Language;
     };
     InputTracker.prototype.GoalCheck = function () {
         return this.LanguageProbs[this.BestGuess] > .7 ? true : false;
@@ -97,6 +108,13 @@ var InputTracker = /** @class */ (function () {
             return true;
         }
         return false;*/
+    };
+    InputTracker.prototype.clear = function () {
+        this.BestGuess = "";
+        this.LanguageProbs["English"] = 0;
+        this.LanguageProbs["Spanish"] = 0;
+        this.LanguageProbs["French"] = 0;
+        this.LanguageProbs["German"] = 0;
     };
     return InputTracker;
 }());
