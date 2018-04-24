@@ -2,7 +2,7 @@
 var GermanWords = ["das", "ist", "du", "ich", "nicht", "die", "es", "und", "Sie", "der", "was", "wir", "zu", "ein", "in", "sie", "mir", "mit", "ja", "wie", "den", "auf", "mich", "dass"];
 var SpanWords = ["vez", "año", "tiempo", "dia", "cosa", "ser", "haber", "estar", "tener", "hacer", "su", "lo", "todo", "más", "este", "ya", "muy", "también", "así", "sí", "que", "y", "como", "pero", "o"];
 var EngWords = ["the", "be", "to", "of", "and", "a", "in", "that", "have", "I", "it", "for", "not", "on", "with", "he", "as", "you", "do", "at", "this", "but", "his", "by", "from"];
-var FrenWords = ["Le", "De", "Un", "À", "Être", "Et", "En", "Avoir", "Que", "Pour", "Dans", "Ce", "Il", "Qui", "Ne", "Sur", "Se", "Pas", "Plus", "Pouvoir", "Par", "Je", "Avec", "Tout", "Faire"];
+var FrenWords = ["le", "de", "U=un", "À", "Être", "et", "en", "avoir", "que", "pour", "dans", "ce", "il", "qui", "ne", "sur", "se", "pas", "plus", "pouvoir", "par", "je", "avec", "tout", "faire"];
 //below is the letter frequency for the supported languages
 var GerFreq = { "a": .0558, "b": .0196, "c": .0316, "d": .0498, "e": .1693, "f": .0149, "g": .0302, "h": .0498, "i": .0802, "j": .0024, "k": 1.32, "l": .0360, "m": .0255, "n": .1053, "o": .0224, "p": .0067, "q": .0002, "r": .0689, "s": .0642, "t": .0579, "u": .0383, "v": .0084, "w": .0178, "x": .0005, "y": .0005, "z": .0121, "Ä": .0054, "Ö": .0030, "Ü": .0065, "ß": .0037 };
 var EngFreq = { "a": .0834, "b": .0154, "c": .0273, "d": .0414, "e": .1260, "f": .0203, "g": .0192, "h": .0611, "i": .0671, "j": 0.0023, "k": 0.0087, "l": .0424, "m": .0253, "n": .0680, "o": .0770, "p": .0166, "q": 0.0009, "r": .0568, "s": .0611, "t": .0937, "u": .0285, "v": .0106, "w": 2.34, "x": 0.0020, "y": .0204, "z": .0006 };
@@ -27,17 +27,27 @@ var InputTracker = /** @class */ (function () {
     InputTracker.prototype.heuristic = function (word) {
         word = word.toLocaleLowerCase();
         word = word.trim();
+        var runningSum = 0;
         for (var i = 0; i < word.length; i++) {
             this.LanguageProbs["German"] += GerFreq[word[i]];
             this.LanguageProbs["English"] += EngFreq[word[i]];
             this.LanguageProbs["Spanish"] += SpanFreq[word[i]];
             this.LanguageProbs["French"] += FrenFreq[word[i]];
         }
+        runningSum = this.LanguageProbs["German"] + this.LanguageProbs["English"] + this.LanguageProbs["Spanish"] + this.LanguageProbs["French"];
+        this.LanguageProbs["German"] = this.LanguageProbs["German"] / runningSum;
+        this.LanguageProbs["English"] = this.LanguageProbs["English"] / runningSum;
+        this.LanguageProbs["Spanish"] = this.LanguageProbs["Spanish"] / runningSum;
+        this.LanguageProbs["French"] = this.LanguageProbs["French"] / runningSum;
     };
     //attempt to make a determination of for the language of the paragraph
     InputTracker.prototype.process = function (text, key) {
         this.word = text.substring(this.position, text.length - 1);
         this.word = this.word.trim();
+        if (text.trim().length == 0) {
+            this.clear();
+            this.position = 0;
+        }
         if (key == 32) {
             text = text.trim();
             this.position += (text.length - this.position);
@@ -46,26 +56,26 @@ var InputTracker = /** @class */ (function () {
             this.FindBestProb();
             if (this.BestGuess == "English") {
                 if (compareWords(EngWords, this.word)) {
-                    alert("English");
+                    document.getElementById('language').innerHTML = "English";
                 }
             }
             else if (this.BestGuess == "French") {
                 if (compareWords(FrenWords, this.word)) {
-                    alert("French");
+                    document.getElementById('language').innerHTML = "French";
                 }
             }
             else if (this.BestGuess == "Spanish") {
                 if (compareWords(SpanWords, this.word)) {
-                    alert("Spanish");
+                    document.getElementById('language').innerHTML = "Spanish";
                 }
             }
             else if (this.BestGuess == "German") {
                 if (compareWords(GermanWords, this.word)) {
-                    alert("German");
+                    document.getElementById('language').innerHTML = "German";
                 }
             }
             if (this.GoalCheck()) {
-                alert("Threshold");
+                alert("Threshold " + this.BestGuess);
             }
         }
         else {
@@ -89,6 +99,7 @@ var InputTracker = /** @class */ (function () {
             }
         }
         this.BestGuess = Language;
+        document.getElementById('prob').innerHTML = Language;
     };
     InputTracker.prototype.GoalCheck = function () {
         return this.LanguageProbs[this.BestGuess] > .7 ? true : false;
@@ -97,6 +108,13 @@ var InputTracker = /** @class */ (function () {
             return true;
         }
         return false;*/
+    };
+    InputTracker.prototype.clear = function () {
+        this.BestGuess = "";
+        this.LanguageProbs["English"] = 0;
+        this.LanguageProbs["Spanish"] = 0;
+        this.LanguageProbs["French"] = 0;
+        this.LanguageProbs["German"] = 0;
     };
     return InputTracker;
 }());

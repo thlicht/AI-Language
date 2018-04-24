@@ -2,7 +2,7 @@
 const GermanWords: Array<string> = ["das","ist","du","ich", "nicht","die","es","und","Sie","der","was","wir","zu","ein","in","sie","mir","mit","ja","wie","den","auf","mich","dass"];
 const SpanWords: Array<string> = ["vez", "año", "tiempo", "dia", "cosa" ,"ser","haber", "estar","tener","hacer","su", "lo", "todo","más", "este", "ya","muy","también", "así", "sí", "que", "y","como","pero","o"];
 const EngWords: Array<string> = ["the","be","to","of","and","a","in","that","have","I","it","for","not","on","with","he","as","you","do","at","this","but","his","by","from"];
-const FrenWords: Array<string> = ["Le","De","Un","À","Être","Et","En","Avoir","Que","Pour","Dans","Ce","Il","Qui","Ne","Sur","Se","Pas","Plus","Pouvoir","Par","Je","Avec","Tout","Faire"];
+const FrenWords: Array<string> = ["le","de","U=un","À","Être","et","en","avoir","que","pour","dans","ce","il","qui","ne","sur","se","pas","plus","pouvoir","par","je","avec","tout","faire"];
 
 interface LetterToFreq {
     [letter:string] : number;
@@ -43,6 +43,7 @@ class InputTracker {
     heuristic(word: string){
         word = word.toLocaleLowerCase();
         word = word.trim();
+        let runningSum = 0;
         for (let i = 0; i < word.length; i++)
         {
             this.LanguageProbs["German"] += GerFreq[word[i]];
@@ -50,12 +51,22 @@ class InputTracker {
             this.LanguageProbs["Spanish"] += SpanFreq[word[i]];
             this.LanguageProbs["French"] += FrenFreq[word[i]];
         }
+        runningSum = this.LanguageProbs["German"] + this.LanguageProbs["English"] + this.LanguageProbs["Spanish"] + this.LanguageProbs["French"];
+        this.LanguageProbs["German"] = this.LanguageProbs["German"] / runningSum;
+        this.LanguageProbs["English"] = this.LanguageProbs["English"] / runningSum;
+        this.LanguageProbs["Spanish"] = this.LanguageProbs["Spanish"] / runningSum;
+        this.LanguageProbs["French"] = this.LanguageProbs["French"] / runningSum;
     }
 
     //attempt to make a determination of for the language of the paragraph
     process(text: string, key: number):void {
         this.word = text.substring(this.position,text.length-1);
         this.word = this.word.trim();
+        if(text.trim().length == 0){
+            this.clear();
+            this.position = 0;
+        }
+
         if(key == 32)
         {
             text = text.trim();
@@ -67,33 +78,33 @@ class InputTracker {
             {
                 if(compareWords(EngWords, this.word))
                 {
-                    alert("English");
+                    document.getElementById('language').innerHTML = "English"
                 }
             }
             else if (this.BestGuess == "French")
             {
                 if(compareWords(FrenWords, this.word))
                 {
-                    alert("French");
+                    document.getElementById('language').innerHTML = "French"
                 }
             }
             else if (this.BestGuess == "Spanish")
             {
                 if(compareWords(SpanWords, this.word))
                 {
-                    alert("Spanish");
+                    document.getElementById('language').innerHTML = "Spanish"
                 }
             }
             else if (this.BestGuess == "German")
             {
                 if(compareWords(GermanWords, this.word))
                 {
-                    alert("German");
+                    document.getElementById('language').innerHTML = "German"
                 }
             }
              if(this.GoalCheck())
              {
-                 alert("Threshold");
+                 alert("Threshold " + this.BestGuess);
              }
         }
         else{
@@ -125,16 +136,25 @@ class InputTracker {
         }
 
         this.BestGuess = Language;
+        document.getElementById('prob').innerHTML = Language;
     }
 
     GoalCheck () : boolean {
 
-        return this.LanguageProbs[this.BestGuess] > .7 ? true : false;
+        return this.LanguageProbs[this.BestGuess] > .5 ? true : false;
         /*if (this.LanguageProbs[this.BestGuess] > .70)
         {
             return true;
         }
         return false;*/
+    }
+
+    clear () {
+        this.BestGuess = "";
+        this.LanguageProbs["English"] = 0;
+        this.LanguageProbs["Spanish"] = 0;
+        this.LanguageProbs["French"] = 0;
+        this.LanguageProbs["German"] = 0;
     }
 }
 
