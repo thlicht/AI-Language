@@ -1,8 +1,8 @@
 //Begin knowledge base 
 const GermanWords: Array<string> = ["das","ist","du","ich", "nicht","die","es","und","Sie","der","was","wir","zu","ein","in","sie","mir","mit","ja","wie","den","auf","mich","dass"];
 const SpanWords: Array<string> = ["vez", "año", "tiempo", "dia", "cosa" ,"ser","haber", "estar","tener","hacer","su", "lo", "todo","más", "este", "ya","muy","también", "así", "sí", "que", "y","como","pero","o"];
-const EngWords: Array<string> = ["the","be","to","of","and","a","in","that","have","I","it","for","not","on","with","he","as","you","do","at","this","but","his","by","from"];
-const FrenWords: Array<string> = ["le","de","U=un","À","Être","et","en","avoir","que","pour","dans","ce","il","qui","ne","sur","se","pas","plus","pouvoir","par","je","avec","tout","faire"];
+const EngWords: Array<string> = ["the","be","to","of","and","a","in","that","have","i","it","for","not","on","with","he","as","you","do","at","this","but","his","by","from"];
+const FrenWords: Array<string> = ["le","de","un","à","être","et","en","avoir","que","pour","dans","ce","il","qui","ne","sur","se","pas","plus","pouvoir","par","je","avec","tout","faire"];
 
 interface LetterToFreq {
     [letter:string] : number;
@@ -14,8 +14,25 @@ const FrenFreq:LetterToFreq = { "a" : .0813, "b" : .0093, "c": .0315, "d" : .035
 const SpanFreq:LetterToFreq = { "a" : .11720, "b" : .0149, "c": .0387, "d" : .0467, "e":.1372, "f":.0069, "g":.01, "h":.0118, "i":.0528 ,"j":.0052, "k":.0011, "l":.0524, "m":.0308,"n":.0683,"o":.0844,"p":.0289, "q":.0111, "r":.0641, "s":.0720, "t":.0460, "u":.0455, "v":.0105, "w":.0004, "x":.0014, "y":.0109, "z":.0047, "Á":0.0044, "É":0.0036, "Í":0.0070, "Ñ":0.0017, "Ó":0.0076, "Ú":0.0012, "Ü":0.0002};
 //end knowledge base
 
-let compareWords = (wordstoCompare: Array<string>, word: string):boolean => {
+let compareWords = (lang:string, word: string):boolean => {
     
+    let wordstoCompare = null;
+    if(lang == "English")
+    {
+        wordstoCompare = EngWords;
+    }
+    else if (lang == "French")
+    {
+        wordstoCompare = FrenWords;
+    }
+    else if(lang == "Spanish"){
+        wordstoCompare = SpanWords;
+    }
+    else{
+        wordstoCompare = GermanWords;
+    }
+
+
     for (let i = 0;i < 25; i++)
     {
         if (word == wordstoCompare[i])
@@ -81,41 +98,20 @@ class InputTracker {
         if(key == 32)
         {
             text = text.trim();
+            text = text.replace(/^\s+|\s+$/g, '');
             this.position += (text.length - this.position);
             //from here process the word to see if it's language can be found
             this.heuristic(this.word);
             this.FindBestProb();
-            if(this.BestGuess == "English" || this.SecondGuess == "English")
-            {
-                if(compareWords(EngWords, this.word))
-                {
-                    document.getElementById('language').innerHTML = "English"
-                }
+            if (compareWords(this.BestGuess, this.word)){
+                document.getElementById('language').innerHTML = 'Match made for: ' + this.BestGuess;
             }
-            else if (this.BestGuess == "French" || this.SecondGuess == "French")
-            {
-                if(compareWords(FrenWords, this.word))
-                {
-                    document.getElementById('language').innerHTML = "French"
-                }
-            }
-            else if (this.BestGuess == "Spanish" || this.SecondGuess == "Spanish")
-            {
-                if(compareWords(SpanWords, this.word))
-                {
-                    document.getElementById('language').innerHTML = "Spanish"
-                }
-            }
-            else if (this.BestGuess == "German" || this.SecondGuess == "German")
-            {
-                if(compareWords(GermanWords, this.word))
-                {
-                    document.getElementById('language').innerHTML = "German"
-                }
+            else if(compareWords(this.SecondGuess, this.word)){
+                document.getElementById('language').innerHTML = 'Match made for: ' + this.SecondGuess;
             }
              if(this.GoalCheck())
              {
-                 alert("Threshold " + this.BestGuess);
+                document.getElementById('language').innerHTML = 'Threshhold Reached for: ' + this.BestGuess;
              }
         }
         else{
@@ -146,7 +142,12 @@ class InputTracker {
                 large = this.LanguageProbs[Langs[i]];
                 Language = Langs[i];
             }
-            else if (this.LanguageProbs[Langs[i]] < large && this.LanguageProbs[Langs[i]] > sLarge){
+            
+        }
+
+        for (let i = 0; i < 4; i++)
+        {
+            if (this.LanguageProbs[Langs[i]] < large && this.LanguageProbs[Langs[i]] > sLarge){
                 second = Langs[i];
                 sLarge = this.LanguageProbs[Langs[i]];
             }
@@ -154,7 +155,6 @@ class InputTracker {
 
         this.BestGuess = Language;
         this.SecondGuess = second;
-        document.getElementById('prob').innerHTML = Language;
     }
 
     GoalCheck () : boolean {
@@ -173,6 +173,7 @@ class InputTracker {
         this.LanguageProbs["Spanish"] = 0;
         this.LanguageProbs["French"] = 0;
         this.LanguageProbs["German"] = 0;
+        document.getElementById('language').innerHTML = "";
     }
 }
 
@@ -197,7 +198,6 @@ function checkInput(code:number){
     let textBox = <HTMLInputElement>document.getElementById("text");
     if(Paste)
     {
-        alert(textBox.value);
         let PasteContent = textBox.value.split(" ");
         Paste = false;
 
