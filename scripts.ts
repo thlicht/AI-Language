@@ -27,6 +27,8 @@ let compareWords = (wordstoCompare: Array<string>, word: string):boolean => {
     return false;
 }
 
+let Paste = false;
+
 class InputTracker {
     position: number;
     word: string;
@@ -59,9 +61,16 @@ class InputTracker {
     }
 
     //attempt to make a determination of for the language of the paragraph
-    process(text: string, key: number):void {
-        this.word = text.substring(this.position,text.length-1);
-        this.word = this.word.trim();
+    process(text: string, key: number, paste:boolean):void {
+
+        if(!paste)
+        {
+            this.word = text.substring(this.position,text.length-1);
+            this.word = this.word.trim();
+        }
+        else{
+            this.word = text;
+        }
         if(text.trim().length == 0){
             this.clear();
             this.position = 0;
@@ -160,17 +169,35 @@ class InputTracker {
 
 let tracker = null;
 window.onload = ()=>{
-    let box = document.getElementById("text");
+    //instantiate the tracker object
+    tracker = new InputTracker();
+    let box = <HTMLInputElement>document.getElementById("text");
+    box.contentEditable = "true";
     box.onkeyup = (event)=>{ //loadup changes in the textarea to trigger determinations
         let key = event.keyCode;
         checkInput(key);
     }
-    //instantiate the tracker object
-    tracker = new InputTracker();
+
+    box.onpaste = ()=>{
+        Paste = true;
+    }
+    
 }
 
 function checkInput(code:number){
     let textBox = <HTMLInputElement>document.getElementById("text");
+    if(Paste)
+    {
+        alert(textBox.value);
+        let PasteContent = textBox.value.split(" ");
+        Paste = false;
+
+        for(let i = 0; i < PasteContent.length; i++)
+        {
+            tracker.process(PasteContent[i], 32, true);
+        }
+    }
+
     tracker.process(textBox.value, code);
 }
 
