@@ -24,6 +24,7 @@ var InputTracker = /** @class */ (function () {
         this.word = "";
         this.LanguageProbs = { "German": 0, "English": 0, "French": 0, "Spanish": 0 };
         this.BestGuess = "";
+        this.SecondGuess = "";
     }
     InputTracker.prototype.heuristic = function (word) {
         word = word.toLocaleLowerCase();
@@ -60,22 +61,22 @@ var InputTracker = /** @class */ (function () {
             //from here process the word to see if it's language can be found
             this.heuristic(this.word);
             this.FindBestProb();
-            if (this.BestGuess == "English") {
+            if (this.BestGuess == "English" || this.SecondGuess == "English") {
                 if (compareWords(EngWords, this.word)) {
                     document.getElementById('language').innerHTML = "English";
                 }
             }
-            else if (this.BestGuess == "French") {
+            else if (this.BestGuess == "French" || this.SecondGuess == "French") {
                 if (compareWords(FrenWords, this.word)) {
                     document.getElementById('language').innerHTML = "French";
                 }
             }
-            else if (this.BestGuess == "Spanish") {
+            else if (this.BestGuess == "Spanish" || this.SecondGuess == "Spanish") {
                 if (compareWords(SpanWords, this.word)) {
                     document.getElementById('language').innerHTML = "Spanish";
                 }
             }
-            else if (this.BestGuess == "German") {
+            else if (this.BestGuess == "German" || this.SecondGuess == "German") {
                 if (compareWords(GermanWords, this.word)) {
                     document.getElementById('language').innerHTML = "German";
                 }
@@ -90,7 +91,9 @@ var InputTracker = /** @class */ (function () {
     };
     InputTracker.prototype.FindBestProb = function () {
         var Language = this.BestGuess;
+        var second = this.SecondGuess;
         var large;
+        var sLarge = 0;
         if (this.BestGuess == "") {
             large = 0;
         }
@@ -103,8 +106,13 @@ var InputTracker = /** @class */ (function () {
                 large = this.LanguageProbs[Langs[i]];
                 Language = Langs[i];
             }
+            else if (this.LanguageProbs[Langs[i]] < large && this.LanguageProbs[Langs[i]] > sLarge) {
+                second = Langs[i];
+                sLarge = this.LanguageProbs[Langs[i]];
+            }
         }
         this.BestGuess = Language;
+        this.SecondGuess = second;
         document.getElementById('prob').innerHTML = Language;
     };
     InputTracker.prototype.GoalCheck = function () {
