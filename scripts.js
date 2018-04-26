@@ -115,6 +115,8 @@ var InputTracker = /** @class */ (function () {
         }
         this.BestGuess = Language;
         this.SecondGuess = second;
+        document.getElementById('best').innerHTML = 'Best Guess: ' + Language;
+        document.getElementById('second').innerHTML = 'Second Best Guess: ' + second;
     };
     InputTracker.prototype.GoalCheck = function () {
         return this.LanguageProbs[this.BestGuess] > .5 ? true : false;

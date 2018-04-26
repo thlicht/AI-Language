@@ -155,6 +155,8 @@ class InputTracker {
 
         this.BestGuess = Language;
         this.SecondGuess = second;
+        document.getElementById('best').innerHTML = 'Best Guess: ' + Language;
+        document.getElementById('second').innerHTML = 'Second Best Guess: ' + second;
     }
 
     GoalCheck () : boolean {
